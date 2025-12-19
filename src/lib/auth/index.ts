@@ -2,34 +2,28 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema/index";
-import { nextCookies } from "better-auth/next-js";
-import { randomUUID } from "crypto";
+import { v4 as uuidv4 } from "uuid";
+import {nextCookies} from "better-auth/next-js";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
-      user: schema.user,
+      user: schema.user, 
       session: schema.session,
       account: schema.account,
-      verification: schema.verification,
+      verification: schema.verification, 
     },
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // MVP: no verification
+    requireEmailVerification: false,
   },
-  secret: process.env.BETTER_AUTH_SECRET || "change-this-secret",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  advanced: {
-    database: {
-      generateId: () => randomUUID(),
-    },
-  },
+  socialProviders: {},
   sessions: {
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7
     }
   },
   cookies: {
@@ -40,12 +34,14 @@ export const auth = betterAuth({
         secure: process.env.NODE_ENV === "production",
         sameSite: 'strict',
         path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
       }
+    }
+  },
+  advanced: {
+    database: {
+      generateId: () => uuidv4()
     }
   },
   plugins: [nextCookies()]
 });
-
-export type Session = typeof auth.$Infer.Session;
-

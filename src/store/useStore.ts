@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Product } from "@/db/schema";
+import { Product } from "@/lib/db/schema";
 
 interface CartItem extends Product {
   quantity: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/db/schema";
+import { Product } from "@/lib/db/schema";
 import { ProductCard } from "./ProductCard";
 
 interface CardListProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/db/schema";
+import { Product } from "@/lib/db/schema";
 import { useStore } from "@/store/useStore";
 import Image from "next/image";
 import Link from "next/link";
