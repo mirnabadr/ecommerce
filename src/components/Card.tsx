@@ -60,9 +60,11 @@ export function Card({
             <p className="text-xs text-gray-500 mb-3">{meta}</p>
           )}
           <div className="flex items-center justify-between">
-            <span className="text-xl font-bold text-gray-900">
-              ${price.toFixed(2)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`text-xl font-bold ${meta && meta.includes("off") ? "text-gray-400 line-through" : "text-gray-900"}`}>
+                ${price.toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
       </div>

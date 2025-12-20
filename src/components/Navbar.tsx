@@ -26,25 +26,25 @@ export function Navbar() {
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              href="/men"
+              href="/products?gender=men"
               className="text-black hover:text-gray-600 transition-colors font-medium"
             >
               Men
             </Link>
             <Link
-              href="/women"
+              href="/products?gender=women"
               className="text-black hover:text-gray-600 transition-colors font-medium"
             >
               Women
             </Link>
             <Link
-              href="/kids"
+              href="/products?gender=unisex"
               className="text-black hover:text-gray-600 transition-colors font-medium"
             >
               Kids
             </Link>
             <Link
-              href="/collections"
+              href="/products"
               className="text-black hover:text-gray-600 transition-colors font-medium"
             >
               Collections
