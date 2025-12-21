@@ -239,7 +239,7 @@ export async function getAllProducts(
     .where(and(...conditions)!);
 
   // Apply sorting
-  let sortedQuery = baseQuery;
+  let sortedQuery: any;
   switch (sortBy) {
     case "price_asc":
       // We'll need to join with variants for price sorting
