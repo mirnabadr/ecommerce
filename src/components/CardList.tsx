@@ -1,10 +1,10 @@
 "use client";
 
-import { Product } from "@/lib/db/schema";
+import { ProductListItem } from "@/lib/actions/product";
 import { ProductCard } from "./ProductCard";
 
 interface CardListProps {
-  products: Product[];
+  products: ProductListItem[];
   title?: string;
   showBestSeller?: boolean;
 }
