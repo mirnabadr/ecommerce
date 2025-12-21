@@ -147,9 +147,9 @@ export async function signIn(formData: FormData) {
     console.log("SignIn response:", JSON.stringify(res, null, 2));
 
     // Check for Better Auth errors
-    if (res.error) {
+    if ('error' in res && res.error) {
       console.error("Better Auth signIn error:", res.error);
-      const errorMessage = res.error.message || 
+      const errorMessage = (res.error as any).message || 
         (typeof res.error === 'string' ? res.error : "Invalid email or password");
       return { 
         ok: false, 
