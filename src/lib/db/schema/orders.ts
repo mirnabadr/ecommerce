@@ -13,8 +13,9 @@ export const orders = pgTable("orders", {
   orderNumber: text("order_number").notNull().unique(),
   status: text("status", { enum: orderStatusEnum }).notNull().default("pending"),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
-  shippingAddressId: uuid("shipping_address_id").notNull().references(() => addresses.id, { onDelete: "restrict" }),
-  billingAddressId: uuid("billing_address_id").notNull().references(() => addresses.id, { onDelete: "restrict" }),
+  stripeSessionId: text("stripe_session_id").unique(),
+  shippingAddressId: uuid("shipping_address_id").references(() => addresses.id, { onDelete: "restrict" }),
+  billingAddressId: uuid("billing_address_id").references(() => addresses.id, { onDelete: "restrict" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -44,8 +45,9 @@ export const orderSchema = z.object({
   orderNumber: z.string().min(1),
   status: orderStatusSchema,
   totalAmount: z.string().regex(/^\d+\.\d{2}$/, "Total amount must be in format 0.00"),
-  shippingAddressId: z.string().uuid(),
-  billingAddressId: z.string().uuid(),
+  stripeSessionId: z.string().nullable().optional(),
+  shippingAddressId: z.string().uuid().nullable().optional(),
+  billingAddressId: z.string().uuid().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ProductGallery } from "./ProductGallery";
 import { ColorSwatches } from "./ColorSwatches";
 import { SizePicker } from "./SizePicker";
 import { CollapsibleSection } from "./CollapsibleSection";
 import { Heart, ShoppingBag } from "lucide-react";
+import { addToCart } from "@/lib/actions/cart";
+import { toggleFavorite, isFavorite } from "@/lib/actions/favorites";
 import type { ProductDetail } from "@/lib/actions/product";
 
 interface ProductDetailClientProps {
@@ -13,9 +16,14 @@ interface ProductDetailClientProps {
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
+  const router = useRouter();
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     product.variants[0]?.id || null
   );
+  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null);
+  const [isFavoriteState, setIsFavoriteState] = useState<boolean | null>(null);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
   // Helper function to get images for a specific variant (same logic as gallery)
   const getImagesForVariant = useCallback((variantId: string | null) => {
@@ -45,6 +53,70 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     () => product.variants.find((v) => v.id === selectedVariantId),
     [selectedVariantId, product.variants]
   );
+
+  // Check favorite status on mount
+  useEffect(() => {
+    isFavorite(product.id).then((fav) => setIsFavoriteState(fav ?? false));
+  }, [product.id]);
+
+  // Find the variant that matches selected color and size
+  const finalVariant = useMemo(() => {
+    if (!selectedVariant) {
+      return null;
+    }
+    
+    // If size is selected, find variant with same color and selected size
+    if (selectedSizeId) {
+      const matchingVariant = product.variants.find(
+        (v) => v.color.id === selectedVariant.color.id && v.size.id === selectedSizeId
+      );
+      return matchingVariant || selectedVariant;
+    }
+    
+    // Otherwise use the selected variant (which has a default size)
+    return selectedVariant;
+  }, [selectedVariant, selectedSizeId, product.variants]);
+
+  const handleAddToBag = async () => {
+    if (!finalVariant) {
+      alert("Please select a color and size");
+      return;
+    }
+
+    setIsAddingToCart(true);
+    try {
+      const result = await addToCart(finalVariant.id, 1);
+      if (result.success) {
+        // Show success feedback
+        alert("Added to bag!");
+        router.refresh(); // Refresh to update cart count
+      } else {
+        alert(result.error || "Failed to add to bag");
+      }
+    } catch (error) {
+      console.error("Add to bag error:", error);
+      alert("An error occurred while adding to bag");
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    setIsTogglingFavorite(true);
+    try {
+      const result = await toggleFavorite(product.id);
+      if (result.success && result.isFavorite !== undefined) {
+        setIsFavoriteState(result.isFavorite);
+      } else {
+        alert(result.error || "Failed to update favorite");
+      }
+    } catch (error) {
+      console.error("Toggle favorite error:", error);
+      alert("An error occurred");
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
 
   // Group variants by color for color swatches
   // For each color, find a UNIQUE image to avoid duplicates
@@ -244,17 +316,33 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         />
 
         {/* Size Picker */}
-        <SizePicker sizes={sizes} />
+        <SizePicker 
+          sizes={sizes} 
+          selectedSizeId={selectedSizeId}
+          onSizeChange={setSelectedSizeId}
+        />
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <button className="flex-1 bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors flex items-center justify-center gap-2">
+          <button 
+            onClick={handleAddToBag}
+            disabled={isAddingToCart || !finalVariant}
+            className="flex-1 bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <ShoppingBag className="w-5 h-5" />
-            Add to Bag
+            {isAddingToCart ? "Adding..." : "Add to Bag"}
           </button>
-          <button className="px-6 py-3 border-2 border-gray-300 rounded-md font-medium hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors flex items-center justify-center gap-2">
-            <Heart className="w-5 h-5" />
-            Favorite
+          <button 
+            onClick={handleToggleFavorite}
+            disabled={isTogglingFavorite}
+            className={`px-6 py-3 border-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isFavoriteState
+                ? "border-red-500 text-red-500 hover:bg-red-50"
+                : "border-gray-300 text-gray-700 hover:border-gray-400"
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${isFavoriteState ? "fill-current" : ""}`} />
+            {isTogglingFavorite ? "..." : "Favorite"}
           </button>
         </div>
 
@@ -284,11 +372,6 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title="Reviews" badge={10} rating={5}>
-            <div className="text-center py-8 text-gray-500">
-              <p>No reviews yet. Be the first to review this product!</p>
-            </div>
-          </CollapsibleSection>
         </div>
       </div>
     </>

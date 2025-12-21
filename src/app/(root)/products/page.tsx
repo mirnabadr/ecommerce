@@ -141,6 +141,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                       imageSrc={primaryImage}
                       badge={badge}
                       href={`/products/${product.id}`}
+                      productId={product.id}
                     />
                   );
                 })}

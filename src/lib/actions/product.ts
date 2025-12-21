@@ -10,9 +10,12 @@ import {
   genders,
   colors,
   sizes,
+  reviews,
+  user,
 } from "@/lib/db/schema";
 import {
   eq,
+  ne,
   and,
   or,
   inArray,
@@ -669,5 +672,202 @@ export async function getProduct(productId: string): Promise<ProductDetail | nul
   };
 
   return productDetail;
+}
+
+export interface Review {
+  id: string;
+  author: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+/**
+ * Get product reviews for a specific product
+ * Returns only approved reviews (all reviews for now, as schema doesn't have approval field)
+ * Sorted by newest first
+ * Returns dummy data if no reviews exist
+ */
+export async function getProductReviews(productId: string): Promise<Review[]> {
+  // Get reviews with user information
+  const reviewsResult = await db
+    .select({
+      review: reviews,
+      userName: user.name,
+    })
+    .from(reviews)
+    .innerJoin(user, eq(reviews.userId, user.id))
+    .where(eq(reviews.productId, productId))
+    .orderBy(desc(reviews.createdAt));
+
+  // If no reviews exist, return dummy data
+  if (reviewsResult.length === 0) {
+    return [
+      {
+        id: "dummy-1",
+        author: "John D.",
+        rating: 5,
+        comment: "Great product! Very comfortable and stylish.",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "dummy-2",
+        author: "Sarah M.",
+        rating: 4,
+        comment: "Good quality, but runs a bit small. Size up if in between sizes.",
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+      },
+      {
+        id: "dummy-3",
+        author: "Mike T.",
+        rating: 5,
+        comment: "Perfect fit and excellent build quality. Highly recommend!",
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+      },
+    ];
+  }
+
+  return reviewsResult.map((r) => ({
+    id: r.review.id,
+    author: r.userName,
+    rating: r.review.rating,
+    comment: r.review.comment,
+    createdAt: r.review.createdAt.toISOString(),
+  }));
+}
+
+export interface RecommendedProduct {
+  id: string;
+  title: string;
+  price: number;
+  mainImage: string;
+}
+
+/**
+ * Get recommended products based on category, brand, and gender
+ * Returns 4-6 products in the same category/brand/gender
+ * Gracefully skips products with invalid/missing images
+ */
+export async function getRecommendedProducts(
+  productId: string
+): Promise<RecommendedProduct[]> {
+  // First, get the current product to find its category, brand, and gender
+  const currentProduct = await db
+    .select({
+      product: products,
+      category: categories,
+      brand: brands,
+      gender: genders,
+    })
+    .from(products)
+    .innerJoin(categories, eq(products.categoryId, categories.id))
+    .innerJoin(brands, eq(products.brandId, brands.id))
+    .innerJoin(genders, eq(products.genderId, genders.id))
+    .where(eq(products.id, productId))
+    .limit(1);
+
+  if (currentProduct.length === 0) {
+    return [];
+  }
+
+  const { category, brand, gender: productGender } = currentProduct[0];
+
+  // Find products in the same category, brand, or gender (excluding current product)
+  const recommendedProductsQuery = await db
+    .select({
+      product: products,
+    })
+    .from(products)
+    .where(
+      and(
+        eq(products.isPublished, true),
+        ne(products.id, productId),
+        or(
+          eq(products.categoryId, category.id),
+          eq(products.brandId, brand.id),
+          eq(products.genderId, productGender.id)
+        )!
+      )!
+    )
+    .limit(20);
+
+  if (recommendedProductsQuery.length === 0) {
+    return [];
+  }
+
+  const recommendedProductIds = recommendedProductsQuery.map((p) => p.product.id);
+
+  // Get price aggregations
+  const priceAggregations = await db
+    .select({
+      productId: productVariants.productId,
+      minPrice: sql<string>`MIN(${productVariants.price})::text`,
+    })
+    .from(productVariants)
+    .where(inArray(productVariants.productId, recommendedProductIds))
+    .groupBy(productVariants.productId);
+
+  const priceMap = new Map<string, number>(
+    priceAggregations.map((p) => [p.productId, parseFloat(p.minPrice)])
+  );
+
+  // Get primary images for products
+  const primaryImages = await db
+    .select({
+      productId: productImages.productId,
+      url: productImages.url,
+    })
+    .from(productImages)
+    .where(
+      and(
+        inArray(productImages.productId, recommendedProductIds),
+        eq(productImages.isPrimary, true)
+      )!
+    )
+    .orderBy(asc(productImages.sortOrder));
+
+  // If no primary images, get first image by sort order
+  const fallbackImages = await db
+    .select({
+      productId: productImages.productId,
+      url: productImages.url,
+    })
+    .from(productImages)
+    .where(inArray(productImages.productId, recommendedProductIds))
+    .orderBy(asc(productImages.sortOrder));
+
+  // Build image map (prioritize primary, then fallback)
+  const imageMap = new Map<string, string>();
+  primaryImages.forEach((img) => {
+    if (!imageMap.has(img.productId) && img.url && img.url.trim() !== "") {
+      imageMap.set(img.productId, img.url);
+    }
+  });
+  fallbackImages.forEach((img) => {
+    if (!imageMap.has(img.productId) && img.url && img.url.trim() !== "") {
+      imageMap.set(img.productId, img.url);
+    }
+  });
+
+  // Build recommended products list, filtering out invalid images
+  const result: RecommendedProduct[] = [];
+  for (const p of recommendedProductsQuery) {
+    const image = imageMap.get(p.product.id);
+    // Skip products without valid images
+    if (!image) continue;
+
+    const price = priceMap.get(p.product.id) || 0;
+    result.push({
+      id: p.product.id,
+      title: p.product.name,
+      price: price,
+      mainImage: image,
+    });
+
+    // Limit to 4-6 products
+    if (result.length >= 6) break;
+  }
+
+  return result;
 }
 
