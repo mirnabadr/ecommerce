@@ -1,24 +1,26 @@
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { z } from "zod";
-import { products } from "./products";
 
-export const categories = pgTable("categories", {
+const categoriesTable = pgTable("categories", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  parentId: uuid("parent_id").references(() => categories.id, { onDelete: "cascade" }), // nullable for hierarchical structure
+  parentId: uuid("parent_id").references((): any => categoriesTable.id, { onDelete: "cascade" }), // nullable for hierarchical structure
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const categoriesRelations = relations(categories, ({ one, many }) => ({
-  parent: one(categories, {
-    fields: [categories.parentId],
-    references: [categories.id],
+export const categories = categoriesTable;
+
+// Relations are defined separately to avoid circular dependencies
+export const categoriesRelations = relations(categoriesTable, ({ one, many }) => ({
+  parent: one(categoriesTable, {
+    fields: [categoriesTable.parentId],
+    references: [categoriesTable.id],
   }),
-  children: many(categories),
-  products: many(products),
+  children: many(categoriesTable),
+  // products relation is defined in products-relations.ts to avoid circular dependency
 }));
 
 // Zod validation schemas

@@ -31,3 +31,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   productCollections: many(productCollections),
 }));
 
+// Define categories products relation here to avoid circular dependency
+export const categoriesProductsRelation = relations(categories, ({ many }) => ({
+  products: many(products),
+}));
+
