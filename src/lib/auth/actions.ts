@@ -84,9 +84,9 @@ export async function signUp(formData: FormData) {
     console.log("SignUp response:", JSON.stringify(res, null, 2));
 
     // Check for Better Auth errors
-    if (res.error) {
+    if ('error' in res && res.error) {
       console.error("Better Auth signUp error:", res.error);
-      const errorMessage = res.error.message || 
+      const errorMessage = (res.error as any).message || 
         (typeof res.error === 'string' ? res.error : "Failed to create user. Email may already be in use.");
       return { 
         ok: false, 
