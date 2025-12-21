@@ -88,7 +88,7 @@ export function ColorSwatches({
               aria-label={`Select color ${variant.color.name}`}
               aria-pressed={isSelected}
             >
-              {hasImage ? (
+              {hasImage && variant.imageUrl ? (
                 <>
                   <div className="relative w-full h-full">
                     <Image

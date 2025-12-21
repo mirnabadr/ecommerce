@@ -51,11 +51,11 @@ export default function SignUpPage() {
         router.refresh();
       } else {
         // Handle validation errors
-        if (result.errors) {
+        if (result.errors && typeof result.errors === 'object') {
           setErrors({
-            name: result.errors.name?.[0] || "",
-            email: result.errors.email?.[0] || "",
-            password: result.errors.password?.[0] || "",
+            name: (result.errors as any).name?.[0] || "",
+            email: (result.errors as any).email?.[0] || "",
+            password: (result.errors as any).password?.[0] || "",
           });
         } else if (result.error) {
           // Handle general error

@@ -77,7 +77,7 @@ export default function SignInPage() {
     <div className="w-full">
       {/* Sign Up Link */}
       <div className="text-right mb-6">
-        <span className="text-gray-600">Don't have an account? </span>
+        <span className="text-gray-600">Don&apos;t have an account? </span>
         <Link
           href="/sign-up"
           className="text-black font-medium hover:underline"

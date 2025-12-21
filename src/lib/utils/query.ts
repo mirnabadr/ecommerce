@@ -6,6 +6,8 @@ export type FilterParams = {
   gender?: string[];
   size?: string[];
   color?: string[];
+  brand?: string[];
+  category?: string[];
   price?: string[];
   sort?: string;
 };
@@ -289,7 +291,7 @@ export function setSort(
 export function clearFilters(
   currentParams: Record<string, string | string[] | undefined>
 ): Record<string, string | string[] | undefined> {
-  const { gender, size, color, price, sort, ...rest } = currentParams;
+  const { gender, size, color, brand, category, price, sort, ...rest } = currentParams;
   return rest;
 }
 

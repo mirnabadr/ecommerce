@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { getProduct } from "@/lib/actions/product";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
 import { Breadcrumb } from "@/components/Breadcrumb";
@@ -19,14 +20,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="text-center max-w-md mx-auto px-4">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <p className="text-gray-600 mb-8">
-            The product you're looking for doesn't exist or may have been removed.
+            The product you&apos;re looking for doesn&apos;t exist or may have been removed.
           </p>
-          <a
+          <Link
             href="/products"
             className="inline-block bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors"
           >
             Back to Products
-          </a>
+          </Link>
         </div>
       </div>
     );

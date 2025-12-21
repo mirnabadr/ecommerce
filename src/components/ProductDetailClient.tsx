@@ -225,7 +225,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
     });
     
     return acc;
-  }, [product.variants, product.images, getImagesForVariant]);
+  }, [product.variants, product.images]);
 
   // Get unique sizes from variants
   const sizeMap = new Map<string, { id: string; name: string; slug: string; available: boolean }>();
@@ -280,7 +280,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
 
         {/* Category */}
         <p className="text-base text-gray-600 mb-4">
-          {product.gender.label}'s {product.category.name}
+          {product.gender.label}&apos;s {product.category.name}
         </p>
 
         {/* Price */}

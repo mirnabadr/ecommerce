@@ -18,7 +18,7 @@ export function FavoriteCard({ favorite }: FavoriteCardProps) {
 
   const handleToggleFavorite = async () => {
     const result = await toggleFavorite(favorite.product.id);
-    if (result.success) {
+    if (result.success && result.isFavorite !== undefined) {
       setIsFavorite(result.isFavorite);
       if (!result.isFavorite) {
         // Remove from UI
@@ -67,7 +67,7 @@ export function FavoriteCard({ favorite }: FavoriteCardProps) {
           </h3>
         </Link>
         <p className="text-sm text-gray-600 mb-2">
-          {favorite.product.gender.label}'s {favorite.product.category.name}
+          {favorite.product.gender.label}&apos;s {favorite.product.category.name}
         </p>
         
         <div className="flex items-center justify-between mb-4">

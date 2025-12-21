@@ -103,7 +103,7 @@ export function OrderCard({ order }: OrderCardProps) {
             )}
 
             <h3 className="font-semibold text-gray-900 mb-1">{item.product.name}</h3>
-            <p className="text-sm text-gray-600 mb-2">Men's Shoes</p>
+            <p className="text-sm text-gray-600 mb-2">Men&apos;s Shoes</p>
             <p className="text-sm text-gray-600">
               Size {item.variant.size.name} Quantity {item.quantity}
             </p>
