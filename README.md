@@ -30,11 +30,11 @@ A full-stack, production-ready e-commerce application built with Next.js 15, fea
 ## 📸 Screenshots
 
 ### Homepage - Product Listings
-![Homepage](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/homepage.png?raw=true)
+![Homepage](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/homepage.jpg?raw=true)
 *Clean, modern homepage showcasing latest products with "Add to Cart" and "Favorite" functionality*
 
 ### Product Details Page
-![Product Details](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/product-details.png?raw=true)
+![Product Details](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/product-details.jpg?raw=true)
 *Comprehensive product page with image gallery, variant selection (color/size), and detailed information*
 
 ### Shopping Cart
@@ -50,7 +50,7 @@ A full-stack, production-ready e-commerce application built with Next.js 15, fea
 *Order history with status badges, delivery tracking, and order cancellation*
 
 ### Stripe Checkout
-![Stripe Checkout](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/stripe-checkout.png?raw=true)
+![Stripe Checkout](https://github.com/mirnabadr/ecommerce/blob/main/screenshots/stripe-checkout.jpg?raw=true)
 *Secure Stripe payment checkout with multiple payment options*
 
 ## 🛠️ Tech Stack
