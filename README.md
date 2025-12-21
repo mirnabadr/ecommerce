@@ -313,8 +313,8 @@ Make sure to set all environment variables in your deployment platform:
 **Mirna Badr**
 
 - GitHub: [@mirnabadr](https://github.com/mirnabadr)
-- Portfolio: [Your Portfolio URL]
-- LinkedIn: [Your LinkedIn URL]
+- Portfolio: myportfolioo-mirna.vercel.app/
+- LinkedIn: https://www.linkedin.com/in/mirna-b-ibrahim/
 
 ## 📄 License
 
