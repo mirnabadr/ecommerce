@@ -291,7 +291,7 @@ export async function getAllProducts(
   const results = await paginatedQuery;
 
   // Get product IDs for fetching variants and images
-  const productIds = results.map((r) => r.product.id);
+  const productIds = results.map((r: any) => r.product.id);
 
   if (productIds.length === 0) {
     return { products: [], totalCount };
@@ -365,10 +365,17 @@ export async function getAllProducts(
       colorSpecificImages.map((img) => img.productId)
     );
     const productsNeedingGenericImages = productIds.filter(
-      (id) => !productsWithColorImages.has(id)
+      (id: string) => !productsWithColorImages.has(id)
     );
 
-    let genericImages: typeof colorSpecificImages = [];
+    let genericImages: Array<{
+      productId: string;
+      url: string;
+      sortOrder: number;
+      isPrimary: boolean;
+      variantId: string | null;
+      colorId: string | null;
+    }> = [];
     if (productsNeedingGenericImages.length > 0) {
       const genericImagesResult = await db
         .select({
@@ -398,7 +405,14 @@ export async function getAllProducts(
 
     // Combine and group by product
     const allImages = [...colorSpecificImages, ...genericImages];
-    const imageMap = new Map<string, typeof colorSpecificImages>();
+    const imageMap = new Map<string, Array<{
+      productId: string;
+      url: string;
+      sortOrder: number;
+      isPrimary: boolean;
+      variantId: string | null;
+      colorId: string | null;
+    }>>();
     for (const img of allImages) {
       const existing = imageMap.get(img.productId) || [];
       existing.push(img);
@@ -406,7 +420,7 @@ export async function getAllProducts(
     }
 
     // Build final product list
-    const productList: ProductListItem[] = results.map((r) => {
+    const productList: ProductListItem[] = results.map((r: any) => {
       const prices = priceMap.get(r.product.id) || { min: 0, max: 0 };
       const images = (imageMap.get(r.product.id) || [])
         .slice(0, 5) // Limit to top 5 images
@@ -465,7 +479,7 @@ export async function getAllProducts(
     }
 
     // Build final product list
-    const productList: ProductListItem[] = results.map((r) => {
+    const productList: ProductListItem[] = results.map((r: any) => {
       const prices = priceMap.get(r.product.id) || { min: 0, max: 0 };
       const images = (imageMap.get(r.product.id) || []).slice(0, 5);
 
