@@ -42,7 +42,7 @@ export function ProductCardActions({ productId, variantId }: ProductCardActionsP
 
   const handleToggleFavorite = async () => {
     const result = await toggleFavorite(productId);
-    if (result.success) {
+    if (result.success && result.isFavorite !== undefined) {
       setIsFav(result.isFavorite);
     }
   };
